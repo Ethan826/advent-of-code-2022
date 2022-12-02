@@ -15,28 +15,13 @@ import Effect.Class.Console (logShow)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile)
 
-splitLines :: String -> Array String
-splitLines = split (Pattern "\n\n")
-
-splitStrings :: String -> Array String
-splitStrings = split (Pattern "\n")
-
-numberifyStringArray :: Array String -> Maybe (Array Int)
-numberifyStringArray = traverse fromString
-
-getArrayOfArrays ∷ String → Array (Array String)
-getArrayOfArrays = map splitLines <<< splitStrings
-
-sumFromNumbersString :: String -> Maybe Int
-sumFromNumbersString = splitStrings >>> numberifyStringArray >>> map sum
-
 getSumOfNLargest ∷ String → Int → Maybe Int
 getSumOfNLargest s n = sort >>> reverse >>> take n >>> sum <$> numberArrays
   where
-  numberArrays = traverse sumFromNumbersString $ splitLines s
+  numberArrays = traverse sumFromNumbersString $ split (Pattern "\n\n") s
+  sumFromNumbersString = split (Pattern "\n") >>> traverse fromString >>> map sum
 
 main :: Effect Unit
 main = launchAff_ do
   input <- readTextFile UTF8 "input"
-  let result = getSumOfNLargest input 3
-  liftEffect $ logShow $ result
+  liftEffect $ logShow $ getSumOfNLargest input 3
